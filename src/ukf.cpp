@@ -25,10 +25,10 @@ UKF::UKF() {
   P_ = MatrixXd(5, 5);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 30;
+  std_a_ = 2;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 30;
+  std_yawdd_ = 0.3;
   
   //DO NOT MODIFY measurement noise values below these are provided by the sensor manufacturer.
   // Laser measurement noise standard deviation position1 in m
@@ -181,15 +181,15 @@ void UKF::Prediction(double delta_t) {
   MatrixXd Xsig_aug = MatrixXd(n_aug_, 2 * n_aug_ + 1);
 
   // Create augmented mean state
-  x_aug.head(n_x_) = x_;
+  x_aug.head(5) = x_;
   x_aug(5) = 0;
   x_aug(6) = 0;
 
   // Create augmenetd covariance matrix
   P_aug.fill(0.0);
-  P_aug.topLeftCorner(n_x_, n_x_) = P_;
-  P_aug(n_x_,n_x_) = std_a_ * std_a_;
-  P_aug(n_x_ + 1, n_x_ + 1) = std_yawdd_ * std_yawdd_;
+  P_aug.topLeftCorner(5, 5) = P_;
+  P_aug(5,5) = std_a_ * std_a_;
+  P_aug(6,6) = std_yawdd_ * std_yawdd_;
 
   // Create square root matrix
   MatrixXd L = P_aug.llt().matrixL();
@@ -225,8 +225,8 @@ void UKF::Prediction(double delta_t) {
       if (fabs(yawd) > 0.001)
       {
           // General equations
-          px_p = p_x + (v/yawd) * ( sin(yaw + yawd * delta_t) - sin(yaw));
-          py_p = p_y + (v/yawd) * (-cos(yaw + yawd * delta_t) + cos(yaw));
+          px_p = p_x + v/yawd * ( sin(yaw + yawd * delta_t) - sin(yaw));
+          py_p = p_y + v/yawd * (-cos(yaw + yawd * delta_t) + cos(yaw));
       }
       else
       {
@@ -264,7 +264,7 @@ void UKF::Prediction(double delta_t) {
   double weight_0 = lambda_ / (lambda_ + n_aug_);
   weights_(0) = weight_0;
   // calculate other weights 
-  for (int i = 0; i < 2 * n_aug_ + 1; i++)
+  for (int i = 1; i < 2 * n_aug_ + 1; i++)
   {
       double weight = 0.5 / (n_aug_ + lambda_);
       weights_(i) = weight;
