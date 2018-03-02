@@ -373,7 +373,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   VectorXd z_ = meas_package.raw_measurements_;
 
   // Define measurement size, create matrix for sigma points in measurement space
-  double n_z_ = 3;
+  int n_z_ = 3;
   MatrixXd Zsig = MatrixXd(n_z_, 2 * n_aug_ + 1);
 
   // transform sigma points into measurement space
